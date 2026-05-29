@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import * as XLSX from "xlsx";
-import { CalendarDays, Download, Mail, Phone, Search, UserCheck, UsersRound } from "lucide-react";
+import { CalendarDays, Download, Eye, Mail, Phone, Search, UserCheck, UsersRound } from "lucide-react";
 import { toast } from "react-hot-toast";
 import ToasterClient from "@/Componentes/ToasterClient";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -24,6 +24,13 @@ const mockProfesionales = [
   { id: "dr-ignacio-munoz", nombre: "Dr. Ignacio Munoz" },
 ];
 
+const estadosSolicitud = [
+  { valor: "Sin asignar", clase: "border-amber-200 bg-amber-50 text-amber-700" },
+  { valor: "Asignado", clase: "border-violet-200 bg-violet-50 text-[#6E56CF]" },
+  { valor: "Atendido", clase: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  { valor: "Cerrado", clase: "border-slate-200 bg-slate-100 text-slate-600" },
+];
+
 const mockSolicitudes = [
   {
     id: 1,
@@ -36,6 +43,7 @@ const mockSolicitudes = [
     fechaConsulta: "2026-06-03",
     motivoConsulta: "Dolor mandibular recurrente y sensibilidad dental al frio.",
     profesionalAsignado: "dra-camila-rojas",
+    estadoSolicitud: "Asignado",
   },
   {
     id: 2,
@@ -48,6 +56,7 @@ const mockSolicitudes = [
     fechaConsulta: "2026-06-05",
     motivoConsulta: "Evaluacion general y revision por sangrado de encias.",
     profesionalAsignado: "sin-asignar",
+    estadoSolicitud: "Sin asignar",
   },
   {
     id: 3,
@@ -60,6 +69,7 @@ const mockSolicitudes = [
     fechaConsulta: "2026-06-10",
     motivoConsulta: "Consulta por control estetico y orientacion de tratamiento.",
     profesionalAsignado: "dra-valentina-soto",
+    estadoSolicitud: "Atendido",
   },
   {
     id: 4,
@@ -72,6 +82,7 @@ const mockSolicitudes = [
     fechaConsulta: "2026-06-12",
     motivoConsulta: "Molestia al masticar y posible fractura en pieza posterior.",
     profesionalAsignado: "dr-matias-perez",
+    estadoSolicitud: "Asignado",
   },
   {
     id: 5,
@@ -84,6 +95,7 @@ const mockSolicitudes = [
     fechaConsulta: "2026-06-18",
     motivoConsulta: "Primera evaluacion por tratamiento preventivo y limpieza.",
     profesionalAsignado: "dr-ignacio-munoz",
+    estadoSolicitud: "Cerrado",
   },
 ];
 
@@ -97,14 +109,25 @@ function obtenerProfesionalNombre(idProfesional) {
   return mockProfesionales.find((profesional) => profesional.id === idProfesional)?.nombre || "Sin asignar";
 }
 
+function obtenerClaseEstado(estado) {
+  return estadosSolicitud.find((item) => item.valor === estado)?.clase || estadosSolicitud[0].clase;
+}
+
 export default function FormularioSolicitudesTablaPage() {
   const [nombreBuscado, setNombreBuscado] = useState("");
   const [rutBuscado, setRutBuscado] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
+  const [estadoFiltro, setEstadoFiltro] = useState("Todos");
   const [asignaciones, setAsignaciones] = useState(() =>
     mockSolicitudes.reduce((acc, solicitud) => {
       acc[solicitud.id] = solicitud.profesionalAsignado;
+      return acc;
+    }, {})
+  );
+  const [estados, setEstados] = useState(() =>
+    mockSolicitudes.reduce((acc, solicitud) => {
+      acc[solicitud.id] = solicitud.estadoSolicitud;
       return acc;
     }, {})
   );
@@ -120,22 +143,31 @@ export default function FormularioSolicitudesTablaPage() {
       const cumpleRut = !rutNormalizado || rutSolicitud.includes(rutNormalizado);
       const cumpleDesde = !fechaDesde || solicitud.fechaConsulta >= fechaDesde;
       const cumpleHasta = !fechaHasta || solicitud.fechaConsulta <= fechaHasta;
+      const cumpleEstado = estadoFiltro === "Todos" || estados[solicitud.id] === estadoFiltro;
 
-      return cumpleNombre && cumpleRut && cumpleDesde && cumpleHasta;
+      return cumpleNombre && cumpleRut && cumpleDesde && cumpleHasta && cumpleEstado;
     });
-  }, [fechaDesde, fechaHasta, nombreBuscado, rutBuscado]);
+  }, [estadoFiltro, estados, fechaDesde, fechaHasta, nombreBuscado, rutBuscado]);
 
   function limpiarFiltros() {
     setNombreBuscado("");
     setRutBuscado("");
     setFechaDesde("");
     setFechaHasta("");
+    setEstadoFiltro("Todos");
   }
 
   function asignarProfesional(idSolicitud, idProfesional) {
     setAsignaciones((prev) => ({
       ...prev,
       [idSolicitud]: idProfesional,
+    }));
+  }
+
+  function cambiarEstadoSolicitud(idSolicitud, estadoSolicitud) {
+    setEstados((prev) => ({
+      ...prev,
+      [idSolicitud]: estadoSolicitud,
     }));
   }
 
@@ -154,6 +186,7 @@ export default function FormularioSolicitudesTablaPage() {
       "Fecha estimada consulta": formatearFecha(solicitud.fechaConsulta),
       "Motivo consulta": solicitud.motivoConsulta,
       "Profesional asignado": obtenerProfesionalNombre(asignaciones[solicitud.id]),
+      "Estado solicitud": estados[solicitud.id],
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(datosExportar);
@@ -209,7 +242,7 @@ export default function FormularioSolicitudesTablaPage() {
               </h2>
             </div>
 
-            <div className="grid gap-4 p-4 md:grid-cols-2 md:p-8 xl:grid-cols-5">
+            <div className="grid gap-4 p-4 md:grid-cols-2 md:p-8 xl:grid-cols-6">
               <div className="space-y-3 xl:col-span-2">
                 <label className="ml-1 text-[11px] font-bold uppercase tracking-widest text-slate-400">
                   Nombre paciente
@@ -259,6 +292,24 @@ export default function FormularioSolicitudesTablaPage() {
                   onChange={(event) => setFechaHasta(event.target.value)}
                   className="h-12 rounded-2xl border-slate-200 focus-visible:border-[#6E56CF] focus-visible:ring-violet-100"
                 />
+              </div>
+
+              <div className="space-y-3">
+                <label className="ml-1 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                  Estado
+                </label>
+                <select
+                  value={estadoFiltro}
+                  onChange={(event) => setEstadoFiltro(event.target.value)}
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100"
+                >
+                  <option value="Todos">Todos los estados</option>
+                  {estadosSolicitud.map((estado) => (
+                    <option key={estado.valor} value={estado.valor}>
+                      {estado.valor}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -310,6 +361,19 @@ export default function FormularioSolicitudesTablaPage() {
                       </span>
                     </div>
 
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold ${obtenerClaseEstado(estados[solicitud.id])}`}>
+                        {estados[solicitud.id]}
+                      </span>
+                      <Link
+                        href={`/dashboard/formularioDetalle/${solicitud.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-bold text-slate-700 transition hover:bg-slate-50"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Ver detalle
+                      </Link>
+                    </div>
+
                     <div className="mt-4 grid gap-2 text-[13px] text-slate-600">
                       <span className="inline-flex items-center gap-2">
                         <Phone className="h-4 w-4 text-slate-400" />
@@ -321,13 +385,25 @@ export default function FormularioSolicitudesTablaPage() {
                       </span>
                     </div>
 
-                    <Textarea
-                      readOnly
-                      value={solicitud.motivoConsulta}
-                      className="mt-4 min-h-24 resize-none rounded-2xl border-slate-200 bg-slate-50 text-[13px] text-slate-700"
-                    />
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                          Estado solicitud
+                        </label>
+                        <select
+                          value={estados[solicitud.id]}
+                          onChange={(event) => cambiarEstadoSolicitud(solicitud.id, event.target.value)}
+                          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100"
+                        >
+                          {estadosSolicitud.map((estado) => (
+                            <option key={estado.valor} value={estado.valor}>
+                              {estado.valor}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div className="mt-4 space-y-2">
+                      <div className="space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                         Profesional asignado
                       </label>
@@ -342,6 +418,7 @@ export default function FormularioSolicitudesTablaPage() {
                           </option>
                         ))}
                       </select>
+                      </div>
                     </div>
                   </article>
                 ))}
@@ -356,14 +433,15 @@ export default function FormularioSolicitudesTablaPage() {
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Contacto</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Nacimiento</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Fecha consulta</TableHead>
-                    <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Motivo</TableHead>
+                    <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Detalle</TableHead>
+                    <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Estado</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Profesional asignado</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {solicitudesFiltradas.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-20 text-center">
+                      <TableCell colSpan={7} className="py-20 text-center">
                         <UsersRound className="mx-auto h-10 w-10 text-slate-300" />
                         <p className="mt-3 text-[13px] font-medium italic text-slate-400">
                           No se encontraron solicitudes para los filtros seleccionados.
@@ -400,10 +478,27 @@ export default function FormularioSolicitudesTablaPage() {
                             {formatearFecha(solicitud.fechaConsulta)}
                           </span>
                         </TableCell>
-                        <TableCell className="max-w-[320px] py-4">
-                          <p className="line-clamp-2 text-[13px] font-medium leading-6 text-slate-600">
-                            {solicitud.motivoConsulta}
-                          </p>
+                        <TableCell className="py-4">
+                          <Link
+                            href={`/dashboard/formularioDetalle/${solicitud.id}`}
+                            className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-bold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            <Eye className="h-4 w-4 text-[#6E56CF]" />
+                            Ver detalle
+                          </Link>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <select
+                            value={estados[solicitud.id]}
+                            onChange={(event) => cambiarEstadoSolicitud(solicitud.id, event.target.value)}
+                            className={`h-10 min-w-[145px] rounded-xl border px-3 text-[12px] font-bold outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100 ${obtenerClaseEstado(estados[solicitud.id])}`}
+                          >
+                            {estadosSolicitud.map((estado) => (
+                              <option key={estado.valor} value={estado.valor}>
+                                {estado.valor}
+                              </option>
+                            ))}
+                          </select>
                         </TableCell>
                         <TableCell className="py-4">
                           <select
