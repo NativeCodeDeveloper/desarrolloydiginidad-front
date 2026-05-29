@@ -87,7 +87,7 @@ export default function Seccion1() {
                 {descripcionSecundaria}
               </p>
               <Link
-                href="/agendaProfesionales"
+                href="/formularioSolicitud"
                 className="group inline-flex items-center gap-2 font-semibold text-slate-900 hover:text-indigo-600 transition-colors w-fit"
               >
                 Reservar una hora

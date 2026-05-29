@@ -155,7 +155,7 @@ export default function Seccion3() {
                     Casos clínicos, tratamientos y novedades que este centro comparte para que llegues informado a tu consulta.
                   </p>
                   <Link
-                    href="/agendaProfesionales"
+                    href="/formularioSolicitud"
                     className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:scale-[1.02] w-full max-w-xs justify-center lg:w-auto"
                   >
                     Agendar hora
@@ -219,7 +219,7 @@ export default function Seccion3() {
                   Agenda en línea las 24 horas, sin llamadas ni esperas. Elige el profesional, el día y la hora que mejor se adapte a ti.
                 </p>
                 <Link
-                  href="/agendaProfesionales"
+                  href="/formularioSolicitud"
                   className="inline-flex rounded-full bg-white px-8 py-4 font-bold text-indigo-600 transition hover:bg-slate-50 hover:scale-105 shadow-md"
                 >
                   Agendar mi hora

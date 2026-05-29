@@ -113,7 +113,7 @@ export default function ComoFuncionaPage() {
                 <RevealOnScroll>
                     <div className="text-center">
                         <Link
-                            href="/agendaProfesionales"
+                            href="/formularioSolicitud"
                             className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-10 py-4 md:px-12 md:py-4 text-base md:text-lg font-semibold text-white transition-all hover:bg-indigo-700 shadow-lg hover:shadow-xl"
                         >
                             Agenda tu evaluación médica →

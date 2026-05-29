@@ -191,7 +191,7 @@ function ReservaHoraContent() {
 
             <div className="mt-7 flex flex-col items-center gap-3">
               <a
-                href="/agendaProfesionales"
+                href="/formularioSolicitud"
                 className="inline-flex w-full max-w-xs items-center justify-center rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Agendar otra cita

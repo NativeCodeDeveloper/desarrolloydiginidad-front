@@ -7,7 +7,7 @@ const navLinks = [
   { label: "Inicio", href: "#inicio" },
   { label: "Servicios", href: "#servicios" },
   { label: "Testimonios", href: "#testimonios" },
-  { label: "Agendar hora", href: "/agendaProfesionales" },
+  { label: "Agendar hora", href: "/formularioSolicitud" },
 ];
 
 export default function Footer() {

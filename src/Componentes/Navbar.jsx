@@ -70,7 +70,7 @@ export default function Navbar() {
         {/* Action Buttons */}
         <div className="flex shrink-0 items-center justify-end gap-3 sm:gap-4 lg:w-40">
           <Link
-            href="/agendaProfesionales"
+            href="/formularioSolicitud"
             aria-label="Agendar hora"
             className="hidden rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md transition duration-300 hover:bg-indigo-700 hover:scale-105 sm:inline-flex"
           >
@@ -108,7 +108,7 @@ export default function Navbar() {
           ))}
           <div className="mt-2 border-t border-slate-100 pt-4">
             <Link
-              href="/agendaProfesionales"
+              href="/formularioSolicitud"
               onClick={() => setIsOpen(false)}
               className="block w-full rounded-2xl bg-indigo-600 px-5 py-4 text-center text-[15px] font-bold text-white shadow transition duration-300 hover:bg-indigo-700"
             >

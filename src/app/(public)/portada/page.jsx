@@ -189,7 +189,7 @@ export default function Portada() {
                 {/* CTAs */}
                 <div className="flex flex-wrap items-center gap-3 mb-7">
                   <Link
-                    href="/agendaProfesionales"
+                    href="/formularioSolicitud"
                     className="inline-flex items-center rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:scale-[1.02]"
                   >
                     Agendar hora
@@ -276,7 +276,7 @@ export default function Portada() {
                 )}
                 <div className="flex justify-center flex-wrap gap-3 mb-6">
                   <Link
-                    href="/agendaProfesionales"
+                    href="/formularioSolicitud"
                     className="inline-flex items-center rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700"
                   >
                     Agendar hora

@@ -51,7 +51,7 @@ export default function ServicioPage() {
 
         <RevealOnScroll delayClass="delay-200">
           <Link
-            href="/agendaProfesionales"
+            href="/formularioSolicitud"
             className="inline-flex rounded-full border border-slate-900 px-8 py-3.5 text-sm md:text-base font-medium text-slate-900 transition hover:bg-slate-900 hover:text-white whitespace-nowrap"
           >
             Agendar Evaluación

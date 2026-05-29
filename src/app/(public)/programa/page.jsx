@@ -110,7 +110,7 @@ export default function ProgramaPage() {
 
                                 <div className="space-y-3">
                                     <Link
-                                        href="/agendaProfesionales"
+                                        href="/formularioSolicitud"
                                         className="group inline-flex items-center justify-between w-full bg-indigo-600 hover:bg-indigo-700 rounded-lg px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300"
                                     >
                                         Agendar evaluación médica
@@ -221,7 +221,7 @@ export default function ProgramaPage() {
                                             </p>
                                         </div>
                                         <Link
-                                            href="/agendaProfesionales"
+                                            href="/formularioSolicitud"
                                             className="group inline-flex items-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 px-7 py-3 text-sm font-semibold text-white transition-all duration-300"
                                         >
                                             Agendar evaluación médica
