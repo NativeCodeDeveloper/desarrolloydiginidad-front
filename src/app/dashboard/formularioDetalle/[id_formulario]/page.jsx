@@ -7,6 +7,7 @@ import {
   CalendarDays,
   ClipboardList,
   Mail,
+  MessageCircle,
   Phone,
   Stethoscope,
   UserCheck,
@@ -103,7 +104,7 @@ const estadoClases = {
   "Sin asignar": "border-amber-200 bg-amber-50 text-amber-700",
   Asignado: "border-violet-200 bg-violet-50 text-[#6E56CF]",
   Atendido: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  Cerrado: "border-slate-200 bg-slate-100 text-slate-600",
+  Cerrado: "border-rose-200 bg-rose-50 text-rose-700",
 };
 
 function formatearFecha(fecha) {
@@ -114,6 +115,24 @@ function formatearFecha(fecha) {
 
 function obtenerProfesional(idProfesional) {
   return mockProfesionales.find((profesional) => profesional.id === idProfesional) || mockProfesionales[0];
+}
+
+function crearWhatsappUrl(telefono) {
+  const numero = telefono.replace(/\D/g, "");
+  const mensaje = encodeURIComponent("Hola Como estas te contactamos de la Fundacion Desarrollo y Dignidad");
+  return `https://wa.me/${numero}?text=${mensaje}`;
+}
+
+function crearCalendarioUrl(solicitud) {
+  const params = new URLSearchParams({
+    nombre: solicitud.nombre || "",
+    apellido: solicitud.apellidos || "",
+    rut: solicitud.rut || "",
+    telefono: solicitud.telefono || "",
+    email: solicitud.correo || "",
+  });
+
+  return `/dashboard/calendario?${params.toString()}`;
 }
 
 function InfoItem({ icon: Icon, label, value }) {
@@ -177,6 +196,22 @@ export default function FormularioDetallePage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
+                <Link
+                  href={crearCalendarioUrl(solicitud)}
+                  className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-[12px] font-bold text-[#6E56CF] transition hover:bg-violet-100"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Agendar en calendario
+                </Link>
+                <a
+                  href={crearWhatsappUrl(solicitud.telefono)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-[12px] font-bold text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Contactar por WhatsApp
+                </a>
                 <span className={`inline-flex rounded-full border px-4 py-2 text-[12px] font-bold ${estadoClases[solicitud.estadoSolicitud]}`}>
                   {solicitud.estadoSolicitud}
                 </span>
@@ -234,7 +269,7 @@ export default function FormularioDetallePage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#6E56CF] shadow-sm">
                 <UserRound className="h-6 w-6" />
               </div>
-              <h2 className="mt-5 text-xl font-bold text-slate-900">Ficha rapida</h2>
+              <h2 className="mt-5 text-xl font-bold text-slate-900">Resumen informacion de contacto</h2>
               <div className="mt-6 space-y-4">
                 {[
                   ["Paciente", `${solicitud.nombre} ${solicitud.apellidos}`],

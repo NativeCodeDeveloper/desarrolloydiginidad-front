@@ -28,7 +28,7 @@ const estadosSolicitud = [
   { valor: "Sin asignar", clase: "border-amber-200 bg-amber-50 text-amber-700" },
   { valor: "Asignado", clase: "border-violet-200 bg-violet-50 text-[#6E56CF]" },
   { valor: "Atendido", clase: "border-emerald-200 bg-emerald-50 text-emerald-700" },
-  { valor: "Cerrado", clase: "border-slate-200 bg-slate-100 text-slate-600" },
+  { valor: "Cerrado", clase: "border-rose-200 bg-rose-50 text-rose-700" },
 ];
 
 const mockSolicitudes = [
