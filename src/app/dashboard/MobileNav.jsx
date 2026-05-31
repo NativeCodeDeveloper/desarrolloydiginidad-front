@@ -47,7 +47,7 @@ const ICONS = {
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
+  const { isLoaded, user } = useUser();
   const role = getDashboardRoleFromUser(user);
   const sections = getVisibleDashboardSections(role);
 

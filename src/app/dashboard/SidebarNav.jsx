@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import UserMenu from "./UserMenu";
 import { getDashboardRoleFromUser, getVisibleDashboardSections } from "@/lib/dashboard-access";
 
@@ -202,7 +202,7 @@ function NavAccordion({ id, label, icon, children, openAccordions, onToggle }) {
 
 export default function SidebarNav() {
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
+  const { isLoaded, user } = useUser();
   const role = getDashboardRoleFromUser(user);
   const sections = useMemo(() => getVisibleDashboardSections(role), [role]);
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import * as XLSX from "xlsx";
-import { CalendarDays, Download, Eye, Mail, Phone, Search, UserCheck, UsersRound } from "lucide-react";
+import { CalendarDays, Download, Eye, Mail, Phone, RefreshCw, Search, UserCheck, UsersRound } from "lucide-react";
 import { toast } from "react-hot-toast";
 import ToasterClient from "@/Componentes/ToasterClient";
 import { Input } from "@/components/ui/input";
@@ -16,14 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const mockProfesionales = [
-  { id: "sin-asignar", nombre: "Sin asignar" },
-  { id: "dra-camila-rojas", nombre: "Dra. Camila Rojas" },
-  { id: "dr-matias-perez", nombre: "Dr. Matias Perez" },
-  { id: "dra-valentina-soto", nombre: "Dra. Valentina Soto" },
-  { id: "dr-ignacio-munoz", nombre: "Dr. Ignacio Munoz" },
-];
-
 const estadosSolicitud = [
   { valor: "Sin asignar", clase: "border-amber-200 bg-amber-50 text-amber-700" },
   { valor: "Asignado", clase: "border-violet-200 bg-violet-50 text-[#6E56CF]" },
@@ -31,82 +23,23 @@ const estadosSolicitud = [
   { valor: "Cerrado", clase: "border-rose-200 bg-rose-50 text-rose-700" },
 ];
 
-const mockSolicitudes = [
-  {
-    id: 1,
-    nombre: "Francisca",
-    apellidos: "Morales Diaz",
-    rut: "17.456.982-3",
-    telefono: "+56 9 8321 4477",
-    correo: "francisca.morales@example.com",
-    fechaNacimiento: "1991-04-18",
-    fechaConsulta: "2026-06-03",
-    motivoConsulta: "Dolor mandibular recurrente y sensibilidad dental al frio.",
-    profesionalAsignado: "dra-camila-rojas",
-    estadoSolicitud: "Asignado",
-  },
-  {
-    id: 2,
-    nombre: "Javier",
-    apellidos: "Contreras Silva",
-    rut: "14.908.771-6",
-    telefono: "+56 9 6554 9012",
-    correo: "javier.contreras@example.com",
-    fechaNacimiento: "1986-11-07",
-    fechaConsulta: "2026-06-05",
-    motivoConsulta: "Evaluacion general y revision por sangrado de encias.",
-    profesionalAsignado: "sin-asignar",
-    estadoSolicitud: "Sin asignar",
-  },
-  {
-    id: 3,
-    nombre: "Daniela",
-    apellidos: "Fuentes Araya",
-    rut: "19.224.113-K",
-    telefono: "+56 9 7412 3008",
-    correo: "daniela.fuentes@example.com",
-    fechaNacimiento: "1998-02-22",
-    fechaConsulta: "2026-06-10",
-    motivoConsulta: "Consulta por control estetico y orientacion de tratamiento.",
-    profesionalAsignado: "dra-valentina-soto",
-    estadoSolicitud: "Atendido",
-  },
-  {
-    id: 4,
-    nombre: "Rodrigo",
-    apellidos: "Navarro Pizarro",
-    rut: "12.337.884-5",
-    telefono: "+56 9 9980 1124",
-    correo: "rodrigo.navarro@example.com",
-    fechaNacimiento: "1979-08-31",
-    fechaConsulta: "2026-06-12",
-    motivoConsulta: "Molestia al masticar y posible fractura en pieza posterior.",
-    profesionalAsignado: "dr-matias-perez",
-    estadoSolicitud: "Asignado",
-  },
-  {
-    id: 5,
-    nombre: "Antonia",
-    apellidos: "Vargas Medina",
-    rut: "20.118.490-1",
-    telefono: "+56 9 4210 7788",
-    correo: "antonia.vargas@example.com",
-    fechaNacimiento: "2001-01-13",
-    fechaConsulta: "2026-06-18",
-    motivoConsulta: "Primera evaluacion por tratamiento preventivo y limpieza.",
-    profesionalAsignado: "dr-ignacio-munoz",
-    estadoSolicitud: "Cerrado",
-  },
-];
-
 function formatearFecha(fecha) {
   if (!fecha) return "Sin fecha";
-  const [year, month, day] = fecha.split("-");
+  const fechaNormalizada = String(fecha).slice(0, 10);
+  const [year, month, day] = fechaNormalizada.split("-");
   return `${day}/${month}/${year}`;
 }
 
-function obtenerProfesionalNombre(idProfesional) {
-  return mockProfesionales.find((profesional) => profesional.id === idProfesional)?.nombre || "Sin asignar";
+function obtenerIdFormulario(solicitud) {
+  return solicitud.id_formulario ?? solicitud.id;
+}
+
+function obtenerEstadoSolicitud(solicitud) {
+  return solicitud.estadoSolicitud || "Sin asignar";
+}
+
+function obtenerProfesionalNombre(solicitud) {
+  return solicitud.profesionalAsignado || "Sin asignar";
 }
 
 function obtenerClaseEstado(estado) {
@@ -114,40 +47,218 @@ function obtenerClaseEstado(estado) {
 }
 
 export default function FormularioSolicitudesTablaPage() {
+  const API = process.env.NEXT_PUBLIC_API_URL;
   const [nombreBuscado, setNombreBuscado] = useState("");
   const [rutBuscado, setRutBuscado] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("Todos");
-  const [asignaciones, setAsignaciones] = useState(() =>
-    mockSolicitudes.reduce((acc, solicitud) => {
-      acc[solicitud.id] = solicitud.profesionalAsignado;
-      return acc;
-    }, {})
-  );
-  const [estados, setEstados] = useState(() =>
-    mockSolicitudes.reduce((acc, solicitud) => {
-      acc[solicitud.id] = solicitud.estadoSolicitud;
-      return acc;
-    }, {})
-  );
+  const [solicitudes, setSolicitudes] = useState([]);
+  const [profesionalesDisponibles, setProfesionalesDisponibles] = useState(["Sin asignar"]);
+  const [cargando, setCargando] = useState(true);
+  const [cargandoProfesionales, setCargandoProfesionales] = useState(false);
+  const [actualizandoEstadoId, setActualizandoEstadoId] = useState(null);
+  const [actualizandoProfesionalId, setActualizandoProfesionalId] = useState(null);
+
+  function normalizarRespuestaSolicitudes(respuestaBackend) {
+    return Array.isArray(respuestaBackend) ? respuestaBackend : [];
+  }
+
+  function normalizarRespuestaProfesionales(respuestaBackend) {
+    if (!Array.isArray(respuestaBackend)) return ["Sin asignar"];
+
+    const nombresProfesionales = respuestaBackend
+      .map((profesional) => profesional.nombreProfesional)
+      .filter(Boolean);
+
+    return [...new Set(["Sin asignar", ...nombresProfesionales])];
+  }
+
+  async function seleccionarTodosLosFormularios() {
+    try {
+      if (!API) {
+        setSolicitudes([]);
+        return toast.error("Falta configurar NEXT_PUBLIC_API_URL.");
+      }
+
+      setCargando(true);
+      const res = await fetch(`${API}/solicitud/seleccionarTodosLosFormularios`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        mode: "cors",
+        cache: "no-cache",
+      });
+
+      if (!res.ok) {
+        setSolicitudes([]);
+        return toast.error("No fue posible cargar las solicitudes.");
+      }
+
+      const respuestaBackend = await res.json();
+      setSolicitudes(normalizarRespuestaSolicitudes(respuestaBackend));
+    } catch (error) {
+      console.error(error);
+      setSolicitudes([]);
+      return toast.error("Error de conexion cargando solicitudes.");
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  async function seleccionarTodosProfesionales() {
+    try {
+      if (!API) {
+        setProfesionalesDisponibles(["Sin asignar"]);
+        return toast.error("Falta configurar NEXT_PUBLIC_API_URL.");
+      }
+
+      setCargandoProfesionales(true);
+      const res = await fetch(`${API}/profesionales/seleccionarTodosProfesionales`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        mode: "cors",
+        cache: "no-cache",
+      });
+
+      if (!res.ok) {
+        setProfesionalesDisponibles(["Sin asignar"]);
+        return toast.error("No fue posible cargar los profesionales.");
+      }
+
+      const respuestaBackend = await res.json();
+      setProfesionalesDisponibles(normalizarRespuestaProfesionales(respuestaBackend));
+    } catch (error) {
+      console.error(error);
+      setProfesionalesDisponibles(["Sin asignar"]);
+      return toast.error("Error de conexion cargando profesionales.");
+    } finally {
+      setCargandoProfesionales(false);
+    }
+  }
+
+  async function seleccionarSolicitudesPorFechas() {
+    try {
+      if (!API) {
+        setSolicitudes([]);
+        return toast.error("Falta configurar NEXT_PUBLIC_API_URL.");
+      }
+
+      if (!fechaDesde || !fechaHasta) {
+        return seleccionarTodosLosFormularios();
+      }
+
+      setCargando(true);
+      const res = await fetch(`${API}/solicitud/fechas`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fechaConsultaInicio: `${fechaDesde} 00:00:00`,
+          fechaConsultaFinal: `${fechaHasta} 23:59:59`,
+        }),
+        mode: "cors",
+        cache: "no-cache",
+      });
+
+      if (!res.ok) {
+        setSolicitudes([]);
+        return toast.error("No fue posible filtrar por fechas.");
+      }
+
+      const respuestaBackend = await res.json();
+      setSolicitudes(normalizarRespuestaSolicitudes(respuestaBackend));
+    } catch (error) {
+      console.error(error);
+      setSolicitudes([]);
+      return toast.error("Error de conexion filtrando por fechas.");
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  async function seleccionarSolicitudesPorEstado() {
+    try {
+      if (!API) {
+        setSolicitudes([]);
+        return toast.error("Falta configurar NEXT_PUBLIC_API_URL.");
+      }
+
+      if (estadoFiltro === "Todos" || estadoFiltro === "Sin asignar") {
+        return seleccionarTodosLosFormularios();
+      }
+
+      setCargando(true);
+      const res = await fetch(`${API}/solicitud/estado`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ estadoSolicitud: estadoFiltro }),
+        mode: "cors",
+        cache: "no-cache",
+      });
+
+      if (!res.ok) {
+        setSolicitudes([]);
+        return toast.error("No fue posible filtrar por estado.");
+      }
+
+      const respuestaBackend = await res.json();
+      setSolicitudes(normalizarRespuestaSolicitudes(respuestaBackend));
+    } catch (error) {
+      console.error(error);
+      setSolicitudes([]);
+      return toast.error("Error de conexion filtrando por estado.");
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  async function seleccionarSolicitudesSegunFiltros() {
+    if (fechaDesde && fechaHasta) {
+      return seleccionarSolicitudesPorFechas();
+    }
+
+    if (estadoFiltro !== "Todos" && estadoFiltro !== "Sin asignar") {
+      return seleccionarSolicitudesPorEstado();
+    }
+
+    return seleccionarTodosLosFormularios();
+  }
+
+  useEffect(() => {
+    seleccionarTodosLosFormularios();
+    seleccionarTodosProfesionales();
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      seleccionarSolicitudesSegunFiltros();
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [fechaDesde, fechaHasta, estadoFiltro]);
 
   const solicitudesFiltradas = useMemo(() => {
     const nombreNormalizado = nombreBuscado.trim().toLowerCase();
-    const rutNormalizado = rutBuscado.trim().toLowerCase().replaceAll(".", "");
+    const rutNormalizado = rutBuscado.trim().toLowerCase().replaceAll(".", "").replaceAll("-", "");
 
-    return mockSolicitudes.filter((solicitud) => {
+    return solicitudes.filter((solicitud) => {
       const nombreCompleto = `${solicitud.nombre} ${solicitud.apellidos}`.toLowerCase();
-      const rutSolicitud = solicitud.rut.toLowerCase().replaceAll(".", "");
+      const rutSolicitud = String(solicitud.rut || "").toLowerCase().replaceAll(".", "").replaceAll("-", "");
       const cumpleNombre = !nombreNormalizado || nombreCompleto.includes(nombreNormalizado);
       const cumpleRut = !rutNormalizado || rutSolicitud.includes(rutNormalizado);
-      const cumpleDesde = !fechaDesde || solicitud.fechaConsulta >= fechaDesde;
-      const cumpleHasta = !fechaHasta || solicitud.fechaConsulta <= fechaHasta;
-      const cumpleEstado = estadoFiltro === "Todos" || estados[solicitud.id] === estadoFiltro;
+      const fechaConsulta = String(solicitud.fechaConsulta || "").slice(0, 10);
+      const cumpleDesde = !fechaDesde || fechaConsulta >= fechaDesde;
+      const cumpleHasta = !fechaHasta || fechaConsulta <= fechaHasta;
+      const cumpleEstado = estadoFiltro === "Todos" || obtenerEstadoSolicitud(solicitud) === estadoFiltro;
 
       return cumpleNombre && cumpleRut && cumpleDesde && cumpleHasta && cumpleEstado;
     });
-  }, [estadoFiltro, estados, fechaDesde, fechaHasta, nombreBuscado, rutBuscado]);
+  }, [estadoFiltro, fechaDesde, fechaHasta, nombreBuscado, rutBuscado, solicitudes]);
 
   function limpiarFiltros() {
     setNombreBuscado("");
@@ -157,18 +268,88 @@ export default function FormularioSolicitudesTablaPage() {
     setEstadoFiltro("Todos");
   }
 
-  function asignarProfesional(idSolicitud, idProfesional) {
-    setAsignaciones((prev) => ({
-      ...prev,
-      [idSolicitud]: idProfesional,
-    }));
+  async function asignarProfesional(id_formulario, profesionalAsignado) {
+    try {
+      if (!id_formulario || !profesionalAsignado) {
+        return toast.error("No fue posible identificar la solicitud o el profesional.");
+      }
+
+      setActualizandoProfesionalId(id_formulario);
+      const res = await fetch(`${API}/solicitud/cambiarProfesionalAsignado`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id_formulario, profesionalAsignado }),
+        mode: "cors",
+      });
+
+      if (!res.ok) {
+        return toast.error("No se pudo asignar el profesional.");
+      }
+
+      const respuestaBackend = await res.json();
+      if (respuestaBackend.message === true || respuestaBackend.message === "true") {
+        setSolicitudes((prev) =>
+          prev.map((solicitud) =>
+            obtenerIdFormulario(solicitud) === id_formulario
+              ? { ...solicitud, profesionalAsignado }
+              : solicitud
+          )
+        );
+        return toast.success("Profesional asignado correctamente.");
+      }
+
+      return toast.error("El backend no actualizo el profesional.");
+    } catch (error) {
+      console.error(error);
+      return toast.error("Error de conexion asignando profesional.");
+    } finally {
+      setActualizandoProfesionalId(null);
+    }
   }
 
-  function cambiarEstadoSolicitud(idSolicitud, estadoSolicitud) {
-    setEstados((prev) => ({
-      ...prev,
-      [idSolicitud]: estadoSolicitud,
-    }));
+  async function cambiarEstadoSolicitud(id_formulario, estadoSolicitud) {
+    try {
+      if (!id_formulario || !estadoSolicitud) {
+        return toast.error("No fue posible identificar la solicitud o el estado.");
+      }
+
+      setActualizandoEstadoId(id_formulario);
+      const res = await fetch(`${API}/solicitud/cambiarEstadoFormulario`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id_formulario, estadoSolicitud }),
+        mode: "cors",
+      });
+
+      if (!res.ok) {
+        return toast.error("No se pudo actualizar el estado.");
+      }
+
+      const respuestaBackend = await res.json();
+      if (respuestaBackend.message === true || respuestaBackend.message === "true") {
+        setSolicitudes((prev) =>
+          prev.map((solicitud) =>
+            obtenerIdFormulario(solicitud) === id_formulario
+              ? { ...solicitud, estadoSolicitud }
+              : solicitud
+          )
+        );
+        return toast.success("Estado actualizado correctamente.");
+      }
+
+      return toast.error("El backend no actualizo el estado.");
+    } catch (error) {
+      console.error(error);
+      return toast.error("Error de conexion actualizando estado.");
+    } finally {
+      setActualizandoEstadoId(null);
+    }
   }
 
   function exportarExcel() {
@@ -184,9 +365,10 @@ export default function FormularioSolicitudesTablaPage() {
       "Correo electronico": solicitud.correo,
       "Fecha nacimiento": formatearFecha(solicitud.fechaNacimiento),
       "Fecha estimada consulta": formatearFecha(solicitud.fechaConsulta),
-      "Motivo consulta": solicitud.motivoConsulta,
-      "Profesional asignado": obtenerProfesionalNombre(asignaciones[solicitud.id]),
-      "Estado solicitud": estados[solicitud.id],
+      "Disponibilidad paciente": solicitud.disponibilidadPaciente || "",
+      "Motivo consulta": solicitud.motivoConsulta || "",
+      "Profesional asignado": obtenerProfesionalNombre(solicitud),
+      "Estado solicitud": obtenerEstadoSolicitud(solicitud),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(datosExportar);
@@ -228,7 +410,7 @@ export default function FormularioSolicitudesTablaPage() {
                 Sin asignar
               </span>
               <span className="mt-1 block text-sm font-bold leading-none text-slate-900">
-                {solicitudesFiltradas.filter((item) => asignaciones[item.id] === "sin-asignar").length} pendientes
+                {solicitudesFiltradas.filter((item) => obtenerProfesionalNombre(item) === "Sin asignar").length} pendientes
               </span>
             </div>
           </div>
@@ -265,7 +447,7 @@ export default function FormularioSolicitudesTablaPage() {
                 <Input
                   value={rutBuscado}
                   onChange={(event) => setRutBuscado(event.target.value)}
-                  placeholder="12.345.678-9"
+                  placeholder="123456789"
                   className="h-12 rounded-2xl border-slate-200 focus-visible:border-[#6E56CF] focus-visible:ring-violet-100"
                 />
               </div>
@@ -323,6 +505,15 @@ export default function FormularioSolicitudesTablaPage() {
               </button>
               <button
                 type="button"
+                onClick={seleccionarSolicitudesSegunFiltros}
+                disabled={cargando}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-[13px] font-bold text-slate-600 transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw className={`h-4 w-4 ${cargando ? "animate-spin" : ""}`} />
+                Actualizar
+              </button>
+              <button
+                type="button"
                 onClick={exportarExcel}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-5 text-[13px] font-bold text-emerald-700 transition-all hover:bg-emerald-100"
               >
@@ -338,14 +529,30 @@ export default function FormularioSolicitudesTablaPage() {
                 Solicitudes recibidas
               </h2>
               <span className="text-[11px] font-bold text-slate-400">
-                Datos mock, sin conexion a backend
+                Datos cargados desde API
               </span>
             </div>
 
             <div className="xl:hidden p-4 md:p-6">
               <div className="grid gap-4 lg:grid-cols-2">
-                {solicitudesFiltradas.map((solicitud) => (
-                  <article key={solicitud.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                {cargando ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-[13px] font-bold text-slate-400">
+                    Cargando solicitudes...
+                  </div>
+                ) : solicitudesFiltradas.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+                    <UsersRound className="mx-auto h-10 w-10 text-slate-300" />
+                    <p className="mt-3 text-[13px] font-medium italic text-slate-400">
+                      No se encontraron solicitudes para los filtros seleccionados.
+                    </p>
+                  </div>
+                ) : solicitudesFiltradas.map((solicitud) => {
+                  const idFormulario = obtenerIdFormulario(solicitud);
+                  const estadoSolicitud = obtenerEstadoSolicitud(solicitud);
+                  const profesionalAsignado = obtenerProfesionalNombre(solicitud);
+
+                  return (
+                  <article key={idFormulario} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-base font-bold text-slate-900">
@@ -362,11 +569,11 @@ export default function FormularioSolicitudesTablaPage() {
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold ${obtenerClaseEstado(estados[solicitud.id])}`}>
-                        {estados[solicitud.id]}
+                      <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold ${obtenerClaseEstado(estadoSolicitud)}`}>
+                        {estadoSolicitud}
                       </span>
                       <Link
-                        href={`/dashboard/formularioDetalle/${solicitud.id}`}
+                        href={`/dashboard/formularioDetalle/${idFormulario}`}
                         className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-bold text-slate-700 transition hover:bg-slate-50"
                       >
                         <Eye className="h-3.5 w-3.5" />
@@ -391,8 +598,9 @@ export default function FormularioSolicitudesTablaPage() {
                           Estado solicitud
                         </label>
                         <select
-                          value={estados[solicitud.id]}
-                          onChange={(event) => cambiarEstadoSolicitud(solicitud.id, event.target.value)}
+                          value={estadoSolicitud}
+                          onChange={(event) => cambiarEstadoSolicitud(idFormulario, event.target.value)}
+                          disabled={actualizandoEstadoId === idFormulario}
                           className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100"
                         >
                           {estadosSolicitud.map((estado) => (
@@ -408,20 +616,22 @@ export default function FormularioSolicitudesTablaPage() {
                         Profesional asignado
                       </label>
                       <select
-                        value={asignaciones[solicitud.id]}
-                        onChange={(event) => asignarProfesional(solicitud.id, event.target.value)}
+                        value={profesionalAsignado}
+                        onChange={(event) => asignarProfesional(idFormulario, event.target.value)}
+                        disabled={actualizandoProfesionalId === idFormulario || cargandoProfesionales}
                         className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-700 outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100"
                       >
-                        {mockProfesionales.map((profesional) => (
-                          <option key={profesional.id} value={profesional.id}>
-                            {profesional.nombre}
+                        {[...new Set([profesionalAsignado, ...profesionalesDisponibles])].map((profesional) => (
+                          <option key={profesional} value={profesional}>
+                            {profesional}
                           </option>
                         ))}
                       </select>
                       </div>
                     </div>
                   </article>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -431,7 +641,6 @@ export default function FormularioSolicitudesTablaPage() {
                   <TableRow className="border-b border-slate-100 bg-slate-50/50 hover:bg-slate-50/50">
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Paciente</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Contacto</TableHead>
-                    <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Nacimiento</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Fecha consulta</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Detalle</TableHead>
                     <TableHead className="py-5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Estado</TableHead>
@@ -439,9 +648,18 @@ export default function FormularioSolicitudesTablaPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {solicitudesFiltradas.length === 0 ? (
+                  {cargando ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-20 text-center">
+                      <TableCell colSpan={6} className="py-20 text-center">
+                        <RefreshCw className="mx-auto h-10 w-10 animate-spin text-slate-300" />
+                        <p className="mt-3 text-[13px] font-medium italic text-slate-400">
+                          Cargando solicitudes...
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  ) : solicitudesFiltradas.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-20 text-center">
                         <UsersRound className="mx-auto h-10 w-10 text-slate-300" />
                         <p className="mt-3 text-[13px] font-medium italic text-slate-400">
                           No se encontraron solicitudes para los filtros seleccionados.
@@ -449,8 +667,13 @@ export default function FormularioSolicitudesTablaPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    solicitudesFiltradas.map((solicitud) => (
-                      <TableRow key={solicitud.id} className="border-b border-slate-50 transition-colors hover:bg-slate-50/60">
+                    solicitudesFiltradas.map((solicitud) => {
+                      const idFormulario = obtenerIdFormulario(solicitud);
+                      const estadoSolicitud = obtenerEstadoSolicitud(solicitud);
+                      const profesionalAsignado = obtenerProfesionalNombre(solicitud);
+
+                      return (
+                      <TableRow key={idFormulario} className="border-b border-slate-50 transition-colors hover:bg-slate-50/60">
                         <TableCell className="py-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-[#6E56CF]">
@@ -470,9 +693,6 @@ export default function FormularioSolicitudesTablaPage() {
                           <p className="text-[13px] font-semibold text-slate-600">{solicitud.telefono}</p>
                           <p className="mt-0.5 max-w-[190px] truncate text-[11px] text-slate-400">{solicitud.correo}</p>
                         </TableCell>
-                        <TableCell className="py-4 text-[13px] font-semibold text-slate-600">
-                          {formatearFecha(solicitud.fechaNacimiento)}
-                        </TableCell>
                         <TableCell className="py-4">
                           <span className="inline-flex rounded-xl border border-violet-200 bg-violet-50 px-3 py-1.5 text-[12px] font-bold text-[#6E56CF]">
                             {formatearFecha(solicitud.fechaConsulta)}
@@ -480,18 +700,19 @@ export default function FormularioSolicitudesTablaPage() {
                         </TableCell>
                         <TableCell className="py-4">
                           <Link
-                            href={`/dashboard/formularioDetalle/${solicitud.id}`}
-                            className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-[12px] font-bold text-slate-700 transition hover:bg-slate-50"
+                            href={`/dashboard/formularioDetalle/${idFormulario}`}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-700 transition hover:bg-slate-50"
                           >
-                            <Eye className="h-4 w-4 text-[#6E56CF]" />
+                            <Eye className="h-3.5 w-3.5 text-[#6E56CF]" />
                             Ver detalle
                           </Link>
                         </TableCell>
                         <TableCell className="py-4">
                           <select
-                            value={estados[solicitud.id]}
-                            onChange={(event) => cambiarEstadoSolicitud(solicitud.id, event.target.value)}
-                            className={`h-10 min-w-[145px] rounded-xl border px-3 text-[12px] font-bold outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100 ${obtenerClaseEstado(estados[solicitud.id])}`}
+                            value={estadoSolicitud}
+                            onChange={(event) => cambiarEstadoSolicitud(idFormulario, event.target.value)}
+                            disabled={actualizandoEstadoId === idFormulario}
+                            className={`h-8 min-w-[120px] rounded-lg border px-2.5 text-[11px] font-bold outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-70 ${obtenerClaseEstado(estadoSolicitud)}`}
                           >
                             {estadosSolicitud.map((estado) => (
                               <option key={estado.valor} value={estado.valor}>
@@ -502,19 +723,21 @@ export default function FormularioSolicitudesTablaPage() {
                         </TableCell>
                         <TableCell className="py-4">
                           <select
-                            value={asignaciones[solicitud.id]}
-                            onChange={(event) => asignarProfesional(solicitud.id, event.target.value)}
-                            className="h-10 w-full min-w-[210px] rounded-xl border border-slate-200 bg-white px-3 text-[12px] font-bold text-slate-700 outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100"
+                            value={profesionalAsignado}
+                            onChange={(event) => asignarProfesional(idFormulario, event.target.value)}
+                            disabled={actualizandoProfesionalId === idFormulario || cargandoProfesionales}
+                            className="h-10 w-full min-w-[210px] rounded-xl border border-slate-200 bg-white px-3 text-[12px] font-bold text-slate-700 outline-none transition focus:border-[#6E56CF] focus:ring-2 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-70"
                           >
-                            {mockProfesionales.map((profesional) => (
-                              <option key={profesional.id} value={profesional.id}>
-                                {profesional.nombre}
+                            {[...new Set([profesionalAsignado, ...profesionalesDisponibles])].map((profesional) => (
+                              <option key={profesional} value={profesional}>
+                                {profesional}
                               </option>
                             ))}
                           </select>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

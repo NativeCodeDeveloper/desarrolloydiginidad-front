@@ -19,15 +19,23 @@ export default function Seccion1() {
   const [primerParrafo, setPrimerParrafo] = useState("");
   const [segundoParrafo, setSegundoParrafo] = useState("");
 
+  async function leerJsonSeguro(respuesta) {
+    const tipoContenido = respuesta.headers.get("content-type") || "";
+    if (!tipoContenido.includes("application/json")) return null;
+    return respuesta.json();
+  }
+
   async function cargarContenido() {
     try {
+      if (!API) return;
+
       const [resTitulos, resTextos] = await Promise.all([
         fetch(`${API}/titulo`),
         fetch(`${API}/textos`),
       ]);
 
       if (resTitulos.ok) {
-        const data = await resTitulos.json();
+        const data = await leerJsonSeguro(resTitulos);
         if (Array.isArray(data)) {
           const t3 = data.find((i) => Number(i.id_titulo) === 3);
           if (t3?.titulo) setSobreNosotros(t3.titulo);
@@ -35,7 +43,7 @@ export default function Seccion1() {
       }
 
       if (resTextos.ok) {
-        const data = await resTextos.json();
+        const data = await leerJsonSeguro(resTextos);
         if (Array.isArray(data)) {
           const p1 = data.find((i) => Number(i.id_Textos) === 1);
           const p2 = data.find((i) => Number(i.id_Textos) === 2);

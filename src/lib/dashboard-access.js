@@ -51,6 +51,8 @@ const routeMatchersByRole = {
   basico: [
     /^\/dashboard$/,
     /^\/dashboard\/no-access$/,
+    /^\/dashboard\/formularioSolicitudesTabla$/,
+    /^\/dashboard\/formularioDetalle\/[^/]+$/,
     /^\/dashboard\/calendario$/,
     // /^\/dashboard\/calendarioGeneral$/,
     /^\/dashboard\/bloqueosAgenda$/,
@@ -275,6 +277,7 @@ const DASHBOARD_NAV_SECTIONS = [
     title: "Principal",
     items: [
       { label: "Panel de Reservas", href: "/dashboard", icon: "home" },
+      { label: "Solicitudes de Pacientes", href: "/dashboard/formularioSolicitudesTabla", icon: "users" },
       { label: "Crear Usuarios", href: "/dashboard/createUser", icon: "shield" },
     ],
   },
