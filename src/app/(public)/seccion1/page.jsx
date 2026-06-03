@@ -8,13 +8,13 @@ import RevealOnScroll from "@/Componentes/RevealOnScroll";
 export default function Seccion1() {
   const API = process.env.NEXT_PUBLIC_API_URL;
   const fallbackSobreNosotrosTitulo =
-    process.env.NEXT_PUBLIC_ABOUT_TITLE || "Psicologia infantil integral";
+    process.env.NEXT_PUBLIC_ABOUT_TITLE || "Atencion psicologica en Santiago Centro";
   const fallbackPrimerParrafo =
     process.env.NEXT_PUBLIC_ABOUT_PARAGRAPH_1 ||
-    "Brindamos acompanamiento psicologico infantil con una mirada cercana, respetuosa y especializada en el desarrollo emocional, conductual y social de ninos y ninas.";
+    "Fundacion Desarrollo y Dignidad brinda acompanamiento psicologico presencial y online en Santiago Centro, con una mirada cercana, respetuosa y profesional.";
   const fallbackSegundoParrafo =
     process.env.NEXT_PUBLIC_ABOUT_PARAGRAPH_2 ||
-    "Trabajamos junto a las familias para fortalecer habilidades, favorecer el bienestar y entregar orientacion profesional en cada etapa del crecimiento.";
+    "Trabajamos con ninos, jovenes, adultos y familias para favorecer el bienestar emocional, la salud mental y el acceso oportuno a terapia psicologica.";
   const [sobreNosotros, setSobreNosotros] = useState("");
   const [primerParrafo, setPrimerParrafo] = useState("");
   const [segundoParrafo, setSegundoParrafo] = useState("");

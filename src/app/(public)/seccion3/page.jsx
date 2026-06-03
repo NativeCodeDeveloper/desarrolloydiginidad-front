@@ -138,27 +138,27 @@ export default function Seccion3() {
                     <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
                       <BookOpen className="h-5 w-5 text-white" />
                     </div>
-                    <p className="text-sm text-slate-500 lg:hidden">Contenido del centro</p>
+                    <p className="text-sm text-slate-500 lg:hidden">Equipo del centro</p>
                   </div>
                   <p className="hidden lg:block text-sm text-slate-500 mb-1">
-                    Contenido del centro
+                    Equipo del centro
                   </p>
                   <div className="flex items-center gap-3 mb-1">
                     <span className="text-xs font-semibold tracking-widest text-indigo-600 uppercase">
-                      Publicaciones
+                      Profesionales
                     </span>
                   </div>
                   <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-                    Conoce más antes de agendar
+                    Conoce a quienes trabajan con nosotros
                   </h2>
                   <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-                    Casos clínicos, tratamientos y novedades que este centro comparte para que llegues informado a tu consulta.
+                    Revisa el equipo de profesionales y terapeutas que acompañan los procesos de atención psicológica en Fundación Desarrollo y Dignidad.
                   </p>
                   <Link
                     href="/formularioSolicitud"
                     className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:scale-[1.02] w-full max-w-xs justify-center lg:w-auto"
                   >
-                    Agendar hora
+                    Conocer equipo
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>

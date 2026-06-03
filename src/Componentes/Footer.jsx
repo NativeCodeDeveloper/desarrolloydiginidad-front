@@ -28,7 +28,7 @@ export default function Footer() {
       {/* Background watermark */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center select-none z-0">
         <span className="text-[12vw] font-black leading-none text-white whitespace-nowrap opacity-[0.05]">
-          AGENDA CLÍNICA
+          DESARROLLO Y DIGNIDAD
         </span>
       </div>
 
@@ -40,17 +40,17 @@ export default function Footer() {
             <Link href="/" aria-label="Ir al inicio" className="group mb-6 inline-flex items-center">
               <div className="transition-transform duration-300 group-hover:scale-205">
                 <Image
-                  src="/logo.png"
-                  alt="Agenda Clínica"
-                  width={180}
-                  height={22}
-                  className="h-35 w-auto object-contain"
+                  src="/blan.png"
+                  alt="Fundacion Desarrollo y Dignidad"
+                  width={220}
+                  height={158}
+                  className="h-28 w-auto object-contain sm:h-32"
                 />
               </div>
             </Link>
 
             <p className="text-slate-400 leading-relaxed max-w-xs mb-8 mt-4">
-              Agenda tu hora en línea de forma rápida y segura, en cualquier momento del día.
+              Atencion psicologica presencial y online en Santiago Centro. Agenda tu solicitud de forma rapida y segura.
             </p>
 
             {/* Trust badges */}
@@ -178,7 +178,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-8 flex flex-col gap-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between px-1">
           <p>
-            © {new Date().getFullYear()} Agenda Clínica. Todos los derechos reservados.
+            © {new Date().getFullYear()} {publicContact.companyName}. Todos los derechos reservados.
           </p>
           <p className="flex items-center gap-1.5">
             Desarrollado por{" "}
@@ -198,7 +198,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="font-medium text-slate-300 hover:text-white transition"
             >
-              Agenda Clínica
+              Agenda Clinica
             </a>
           </p>
         </div>

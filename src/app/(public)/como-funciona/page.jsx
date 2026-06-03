@@ -2,32 +2,32 @@
 
 import RevealOnScroll from "@/Componentes/RevealOnScroll";
 import Link from "next/link";
-import { ScanFace, Aperture, FileText, Target } from "lucide-react";
+import { CalendarCheck, ClipboardList, HeartHandshake, MessagesSquare } from "lucide-react";
 
 const STEPS = [
     {
         step: 1,
-        title: "Diagnóstico metabólico real",
-        description: "Identificamos las causas de tu aumento de peso (hormonas, insulina, hábitos)",
-        icon: ScanFace,
+        title: "Completa tu solicitud",
+        description: "Indica tus datos, modalidad de atencion y disponibilidad horaria para una sesion psicologica.",
+        icon: ClipboardList,
     },
     {
         step: 2,
-        title: "Inicio de tratamiento médico",
-        description: "Reducimos el apetito, controlamos la ansiedad y activamos tu metabolismo",
-        icon: Aperture,
+        title: "Coordinamos la agenda",
+        description: "El equipo revisa tu disponibilidad y coordina la alternativa de atencion mas adecuada.",
+        icon: CalendarCheck,
     },
     {
         step: 3,
-        title: "Seguimiento continuo",
-        description: "Ajustamos tu tratamiento semana a semana para asegurar resultados",
-        icon: FileText,
+        title: "Inicias tu proceso",
+        description: "Asistes a una sesion de 50 minutos, presencial en Santiago Centro u online.",
+        icon: MessagesSquare,
     },
     {
         step: 4,
-        title: "Resultados sostenibles",
-        description: "Pierdes peso sin efecto rebote y mejoras tu salud metabólica",
-        icon: Target,
+        title: "Acompanamiento",
+        description: "Recibes orientacion psicologica para avanzar con contencion y continuidad.",
+        icon: HeartHandshake,
     },
 ];
 
@@ -40,10 +40,10 @@ export default function ComoFuncionaPage() {
                 <RevealOnScroll>
                     <div className="text-center mb-20 md:mb-28">
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-slate-900">
-                            ¿Cómo funciona el tratamiento?
+                            ¿Cómo funciona la atención?
                         </h2>
                         <p className="text-lg md:text-xl text-slate-600 font-light max-w-2xl mx-auto">
-                            Un enfoque médico que ataca la <span className="text-indigo-600 font-semibold">causa real de tu peso</span>
+                            Un proceso simple para acceder a <span className="text-indigo-600 font-semibold">atencion psicologica en Santiago Centro</span>
                         </p>
                     </div>
                 </RevealOnScroll>
@@ -105,7 +105,7 @@ export default function ComoFuncionaPage() {
                 {/* Results Text */}
                 <RevealOnScroll className="text-center mb-12 md:mb-16">
                     <p className="text-lg md:text-2xl font-semibold text-slate-700">
-                        <span className="text-indigo-600">baja entre un 8–10% de tu exceso de peso en 3 meses.</span> 
+                        <span className="text-indigo-600">Fundacion Desarrollo y Dignidad atiende en Agustinas 1357 oficina 73-A, Santiago.</span>
                     </p>
                 </RevealOnScroll>
 
@@ -116,11 +116,11 @@ export default function ComoFuncionaPage() {
                             href="/formularioSolicitud"
                             className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-10 py-4 md:px-12 md:py-4 text-base md:text-lg font-semibold text-white transition-all hover:bg-indigo-700 shadow-lg hover:shadow-xl"
                         >
-                            Agenda tu evaluación médica →
+                            Solicitar atencion psicologica →
                         </Link>
                         
                         <p className="text-sm md:text-base text-slate-500 font-light mt-6">
-                            Cupos limitados por seguimiento personalizado
+                            Modalidad presencial y online segun disponibilidad.
                         </p>
                     </div>
                 </RevealOnScroll>

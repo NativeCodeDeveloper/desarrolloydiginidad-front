@@ -1,34 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Fingerprint, Hexagon, Component } from "lucide-react";
+import { Brain, HeartHandshake, Users } from "lucide-react";
 import RevealOnScroll from "@/Componentes/RevealOnScroll";
 
 const tratamientos = [
   {
-    title: "Terapia GLP-1",
-    subtitle: "Regulación Metabólica Dúo",
-    description: "Mediante análogos de GLP-1 (Semaglutida/Tirzepatida) regulamos directamente los centros de saciedad anatómicos, controlando el hambre fisiológico y optimizando el vaciado gástrico para una adherencia perfecta al programa.",
-    icon: Component,
+    title: "Atencion Psicologica",
+    subtitle: "Presencial y online",
+    description: "Sesiones de psicologia para ninos, jovenes y adultos, con acompanamiento profesional orientado al bienestar emocional, la salud mental y el desarrollo personal.",
+    icon: Brain,
     colorClass: "bg-indigo-50 text-indigo-600",
-    linkInfo: "/programa"
+    linkInfo: "/formularioSolicitud",
   },
   {
-    title: "Manejo de Obesidad",
-    subtitle: "Reset Estructural",
-    description: "Abordamos la obesidad no como una falta de voluntad, sino como una condición biológica. Intervenimos con prescripción de última generación para revertir el almacenamiento crónico y recuperar tu peso base sano.",
-    icon: Fingerprint,
+    title: "Terapia Familiar",
+    subtitle: "Orientacion y contencion",
+    description: "Espacios de orientacion para familias que buscan fortalecer la comunicacion, acompanar procesos emocionales y abordar dificultades relacionales con apoyo clinico.",
+    icon: Users,
     colorClass: "bg-slate-100 text-slate-700",
-    linkInfo: "/programa"
+    linkInfo: "/formularioSolicitud",
   },
   {
-    title: "SOP & Insulinorresistencia",
-    subtitle: "Equilibrio Hormonal",
-    description: "Estabilizamos el eje hormonal femenino metabólico. Controlando la sensibilidad cruzada a la insulina abordamos desde adentro la niebla mental, la fatiga y los descontroles de peso asociados al Síndrome de Ovario Poliquístico.",
-    icon: Hexagon,
+    title: "Terapeuta en Formacion",
+    subtitle: "Acceso a bajo costo",
+    description: "Alternativa de atencion psicologica con terapeutas en formacion, supervisada y pensada para facilitar el acceso oportuno a apoyo emocional en Santiago.",
+    icon: HeartHandshake,
     colorClass: "bg-indigo-50 text-indigo-600",
-    linkInfo: "/programa"
-  }
+    linkInfo: "/formularioSolicitud",
+  },
 ];
 
 export default function ServicioPage() {
@@ -41,10 +41,10 @@ export default function ServicioPage() {
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-6xl lg:text-[5.5rem] font-medium tracking-tight text-slate-900 leading-[1.05] mb-6">
               Nuestros<br />
-              Tratamientos
+              Servicios
             </h1>
             <p className="text-lg lg:text-xl text-slate-500 font-light max-w-lg">
-              Ciencia y precisión clínica para un manejo metabólico inteligente y sostenible.
+              Atencion psicologica en Santiago Centro con modalidad presencial y online.
             </p>
           </div>
         </RevealOnScroll>
@@ -96,9 +96,12 @@ export default function ServicioPage() {
                   {tratamiento.description}
                 </p>
 
-                <div className="flex items-center text-slate-900 font-medium text-sm transition-all group-hover:text-indigo-600 cursor-pointer w-fit border-b border-transparent group-hover:border-indigo-600 pb-1">
-                  Ver detalles
-                </div>
+                <Link
+                  href={tratamiento.linkInfo}
+                  className="flex w-fit items-center border-b border-transparent pb-1 text-sm font-medium text-slate-900 transition-all hover:border-indigo-600 hover:text-indigo-600"
+                >
+                  Solicitar atencion
+                </Link>
               </article>
             </RevealOnScroll>
           );
@@ -111,19 +114,19 @@ export default function ServicioPage() {
           <div className="flex flex-col md:flex-row gap-12 items-center justify-between rounded-[2rem] bg-white p-12 md:p-20">
             <div className="max-w-xl">
               <h3 className="text-4xl md:text-5xl font-medium tracking-tight text-slate-900 mb-4">
-                Transforma tu Vida Hoy.
+                Agenda atencion psicologica.
               </h3>
               <p className="text-slate-500 text-lg font-light">
-                Conoce tu elegibilidad clínica resolviendo nuestro breve test metabólico.
+                Completa la solicitud y selecciona los dias y horarios en los que puedes asistir a sesion.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 shrink-0">
               <Link
-                href="/programa"
+                href="/formularioSolicitud"
                 className="rounded-full border border-slate-900 px-8 py-3.5 text-sm md:text-base font-medium text-slate-900 transition hover:bg-slate-900 hover:text-white text-center"
               >
-                Hacer Test Metabólico
+                Solicitar atencion
               </Link>
             </div>
           </div>

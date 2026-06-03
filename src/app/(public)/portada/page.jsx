@@ -15,7 +15,13 @@ import { cn } from "@/lib/utils";
 const CF_BASE = "https://imagedelivery.net/aCBUhLfqUcxA2yhIBn1fNQ";
 
 const fallbackSlides = [
-  { id: "fallback-1", image: "/logoagendaclinica.png", alt: "Centro Médico", titulo: "", descripcion: "" },
+  {
+    id: "fallback-1",
+    image: "/logoagendaclinica.png",
+    alt: "Fundacion Desarrollo y Dignidad - atencion psicologica en Santiago Centro",
+    titulo: "Fundacion Desarrollo y Dignidad",
+    descripcion: "Atencion psicologica presencial y online en Santiago Centro.",
+  },
 ];
 
 const socialLinks = [
@@ -33,7 +39,7 @@ export default function Portada() {
   const touchStartX = useRef(null);
   const API = process.env.NEXT_PUBLIC_API_URL;
   const fallbackSobreNosotrosTitulo =
-    process.env.NEXT_PUBLIC_ABOUT_TITLE || "Psicologia infantil integral";
+    process.env.NEXT_PUBLIC_ABOUT_TITLE || "Atencion psicologica en Santiago Centro";
 
   // ── Lógica original intacta ───────────────────────────
   async function cargarPortada() {
@@ -79,7 +85,7 @@ export default function Portada() {
       image: item.imagenPortada
         ? `${CF_BASE}/${item.imagenPortada}/portada`
         : "/logoagendaclinica.png",
-      alt: item.tituloPortadaCarrusel || "Centro Médico",
+      alt: item.tituloPortadaCarrusel || "Fundacion Desarrollo y Dignidad",
       titulo: item.tituloPortadaCarrusel || "",
       descripcion: item.descripcionPublicacionesPortada || "",
     }));
@@ -159,8 +165,8 @@ export default function Portada() {
             {/* AC badge */}
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
-                Agenda Clínica
+                <span className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
+                Desarrollo y Dignidad
               </span>
             </div>
 
@@ -175,7 +181,7 @@ export default function Portada() {
                 <div className="mb-5">
                   {/* Título viene del portadaEdit (tituloPortadaCarrusel) */}
                   <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight mb-2">
-                    {currentSlide.titulo || "Tu Centro Médico"}
+                    {currentSlide.titulo || "Fundacion Desarrollo y Dignidad"}
                   </h1>
                 </div>
 
@@ -254,7 +260,7 @@ export default function Portada() {
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
-                Agenda Clínica
+                Desarrollo y Dignidad
               </span>
             </div>
 
@@ -267,7 +273,7 @@ export default function Portada() {
                 transition={{ duration: 0.4, ease: "easeInOut" }}
               >
                 <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 mb-2">
-                  {currentSlide.titulo || "Tu Centro Médico"}
+                  {currentSlide.titulo || "Fundacion Desarrollo y Dignidad"}
                 </h1>
                 {(currentSlide.descripcion || sobreNosotros) && (
                   <p className="text-slate-600 text-sm leading-relaxed mb-6">

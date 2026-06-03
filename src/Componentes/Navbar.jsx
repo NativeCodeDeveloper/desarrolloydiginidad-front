@@ -41,10 +41,10 @@ export default function Navbar() {
         <Link href="/" aria-label="Ir al inicio" className="group flex shrink-0 items-center gap-3">
           <div className="relative shrink-0 transition-transform duration-300 group-hover:scale-105">
             <Image
-              src="/logo.png"
-              alt="Agenda Clínica"
-              width={160}
-              height={50}
+              src="/logodesarrollo.png"
+              alt="Fundacion Desarrollo y Dignidad"
+              width={180}
+              height={120}
               priority
               className="h-14 w-auto object-contain sm:h-16"
             />

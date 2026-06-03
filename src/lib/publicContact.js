@@ -1,8 +1,9 @@
-const EMPRESA_NOMBRE = process.env.NEXT_PUBLIC_EMPRESA_NOMBRE || "Agenda Clinica";
+const EMPRESA_NOMBRE = process.env.NEXT_PUBLIC_EMPRESA_NOMBRE || "Fundacion Desarrollo y Dignidad";
 const CONTACT_PHONE = process.env.NEXT_PUBLIC_CONTACT_PHONE || "";
 const CONTACT_WHATSAPP = process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || CONTACT_PHONE;
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "";
-const CONTACT_ADDRESS = process.env.NEXT_PUBLIC_CONTACT_ADDRESS || "";
+const CONTACT_ADDRESS =
+  process.env.NEXT_PUBLIC_CONTACT_ADDRESS || "Agustinas 1357 oficina 73-A, Santiago";
 const CONTACT_MAPS_URL = process.env.NEXT_PUBLIC_CONTACT_MAPS_URL || "";
 
 const INSTAGRAM_URL = process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL || "";
