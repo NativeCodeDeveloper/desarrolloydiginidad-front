@@ -4,8 +4,10 @@ import ShadcnInput from "@/Componentes/shadcnInput2";
 import ToasterClient from "@/Componentes/ToasterClient";
 import toast from "react-hot-toast";
 import {useRouter} from "next/navigation";
+import {useUser} from "@clerk/nextjs";
 import {Calendar28} from "@/Componentes/shadcnCalendarSelector";
 import {InfoButton} from "@/Componentes/InfoButton";
+import {canAccessDashboardPath, getDashboardRoleFromUser} from "@/lib/dashboard-access";
 
 import {
     Table,
@@ -38,6 +40,7 @@ const STORAGE_KEYS = {
 export default function AgendaCitas() {
     const API = process.env.NEXT_PUBLIC_API_URL;
     const router = useRouter();
+    const {isLoaded: isUserLoaded, user} = useUser();
     const [dataLista, setdataLista] = useState([]);
     const [dataListaBase, setDataListaBase] = useState([]);
     const [nombrePaciente, setnombrePaciente] = useState("");
@@ -706,6 +709,12 @@ export default function AgendaCitas() {
         );
     }
 
+    const dashboardRole = getDashboardRoleFromUser(user);
+    const puedeVerModuloFichaClinica = isUserLoaded && canAccessDashboardPath(dashboardRole, "/dashboard/FichaClinica");
+    const puedeVerFichaReserva = isUserLoaded
+        && canAccessDashboardPath(dashboardRole, "/dashboard/FichasPacientes/1")
+        && canAccessDashboardPath(dashboardRole, "/dashboard/NuevaFicha/1");
+
     const resumenEstados = dataLista.reduce((acc, item) => {
         const estado = normalizarEstadoReserva(item?.estadoReserva);
         if (estado === "confirmada" || estado === "confirmado") acc.confirmadas += 1;
@@ -753,15 +762,17 @@ export default function AgendaCitas() {
                             <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest leading-none">Finalizadas</span>
                             <span className="text-lg font-bold text-slate-900 mt-1 leading-none">{resumenEstados.finalizadas}</span>
                         </div>
-                        <button
-                            onClick={() => router.push("/dashboard/FichaClinica")}
-                            className="h-16 px-6 rounded-2xl bg-[#6E56CF] text-white flex items-center gap-2 shadow-sm hover:bg-[#5b45bc] transition-all"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span className="text-[12px] font-bold">Fichas Clínicas</span>
-                        </button>
+                        {puedeVerModuloFichaClinica && (
+                            <button
+                                onClick={() => router.push("/dashboard/FichaClinica")}
+                                className="h-16 px-6 rounded-2xl bg-[#6E56CF] text-white flex items-center gap-2 shadow-sm hover:bg-[#5b45bc] transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span className="text-[12px] font-bold">Fichas Clínicas</span>
+                            </button>
+                        )}
                         <InfoButton informacion={'Gestiona las citas del día. Usa los filtros para localizar pacientes específicos y actualiza el estado de asistencia con un solo clic.'}/>
                     </div>
                 </div>
@@ -896,7 +907,7 @@ export default function AgendaCitas() {
                                             </div>
                                             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                                                 {renderMenuAccionesReserva(data, { menuPositionClass: "left-0 mt-2" })}
-                                                {renderBotonFichaReserva(data)}
+                                                {puedeVerFichaReserva && renderBotonFichaReserva(data)}
                                             </div>
                                         </article>
                                     ))}
@@ -914,13 +925,15 @@ export default function AgendaCitas() {
                                         <TableHead className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest py-5">Profesional</TableHead>
                                         <TableHead className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest py-5">Motivo</TableHead>
                                         <TableHead className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest py-5">Control de Estado</TableHead>
-                                        <TableHead className="w-[100px] text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest py-5 pr-8">Ficha</TableHead>
+                                        {puedeVerFichaReserva && (
+                                            <TableHead className="w-[100px] text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest py-5 pr-8">Ficha</TableHead>
+                                        )}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {dataLista.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="py-32 text-center">
+                                            <TableCell colSpan={puedeVerFichaReserva ? 6 : 5} className="py-32 text-center">
                                                 <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                                 </div>
@@ -954,9 +967,11 @@ export default function AgendaCitas() {
                                                 <TableCell className="py-6 overflow-visible">
                                                     {renderMenuAccionesReserva(reserva)}
                                                 </TableCell>
-                                                <TableCell className="py-6 pr-8 text-center">
-                                                    {renderBotonFichaReserva(reserva)}
-                                                </TableCell>
+                                                {puedeVerFichaReserva && (
+                                                    <TableCell className="py-6 pr-8 text-center">
+                                                        {renderBotonFichaReserva(reserva)}
+                                                    </TableCell>
+                                                )}
                                             </TableRow>
                                         ))
                                     )}
